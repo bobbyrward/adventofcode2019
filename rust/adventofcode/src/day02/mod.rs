@@ -1,3 +1,40 @@
+use crate::solution::Solution;
+
+#[derive(Debug, Clone)]
+pub struct Day02 {}
+
+pub fn create_solution() -> Day02 {
+    Day02 {}
+}
+
+impl Solution for Day02 {
+    fn problem1(&self, input: &str) -> String {
+        let program: Vec<_> = input
+            .split(',')
+            .map(|s| s.trim().parse::<i32>().unwrap())
+            .collect();
+
+        run_gravity_assist(&program, 12, 2).to_string()
+    }
+
+    fn problem2(&self, input: &str) -> String {
+        let program: Vec<_> = input
+            .split(',')
+            .map(|s| s.trim().parse::<i32>().unwrap())
+            .collect();
+
+        for noun in 0..100 {
+            for verb in 0..100 {
+                let output = run_gravity_assist(&program, noun, verb);
+                if output == 19_690_720 {
+                    return (100 * noun + verb).to_string();
+                }
+            }
+        }
+        panic!("No answer found");
+    }
+}
+
 fn run_program(program: &mut [i32]) -> &mut [i32] {
     let mut current_index = 0;
 
@@ -43,30 +80,6 @@ fn run_gravity_assist(program: &[i32], noun: i32, verb: i32) -> i32 {
     run_program(&mut memory);
 
     memory[0]
-}
-
-fn main() {
-    let program: Vec<_> = include_str!("input.txt")
-        .split(',')
-        .map(|s| s.trim().parse::<i32>().unwrap())
-        .collect();
-
-    println!(
-        "Gravity Assist 1202 program alarm state = {}",
-        run_gravity_assist(&program, 12, 2)
-    );
-
-    for noun in 0..100 {
-        for verb in 0..100 {
-            let output = run_gravity_assist(&program, noun, verb);
-            if output == 19_690_720 {
-                println!("Found 19690720. Noun = {}, Verb = {}", noun, verb);
-                println!("100 * noun + verb = {}", 100 * noun + verb);
-                return;
-            }
-        }
-    }
-    panic!("No answer found");
 }
 
 #[cfg(test)]

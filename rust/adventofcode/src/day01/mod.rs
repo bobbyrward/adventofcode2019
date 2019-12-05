@@ -1,4 +1,32 @@
+use crate::solution::Solution;
 use std::iter::{IntoIterator, Iterator};
+
+#[derive(Debug, Clone)]
+pub struct Day01 {}
+
+pub fn create_solution() -> Day01 {
+    Day01 {}
+}
+
+impl Solution for Day01 {
+    fn problem1(&self, input: &str) -> String {
+        let module_masses: Vec<_> = input.lines().map(|l| l.parse::<i32>().unwrap()).collect();
+
+        format!(
+            "{}",
+            total_fuel_required_without_fuel_for_fuel(module_masses.clone())
+        )
+    }
+
+    fn problem2(&self, input: &str) -> String {
+        let module_masses: Vec<_> = input.lines().map(|l| l.parse::<i32>().unwrap()).collect();
+
+        format!(
+            "{}",
+            total_fuel_required_with_fuel_for_fuel(module_masses.clone())
+        )
+    }
+}
 
 fn mass_fuel_required(mass: i32) -> i32 {
     mass / 3 - 2
@@ -30,21 +58,6 @@ fn total_fuel_required_without_fuel_for_fuel(module_masses: impl IntoIterator<It
 /// fuel the added fuel requires
 fn total_fuel_required_with_fuel_for_fuel(module_masses: impl IntoIterator<Item = i32>) -> i32 {
     module_masses.into_iter().map(module_fuel_required).sum()
-}
-
-fn main() {
-    let module_masses: Vec<_> = include_str!("input.txt")
-        .lines()
-        .map(|l| l.parse::<i32>().unwrap())
-        .collect();
-    println!(
-        "{}",
-        total_fuel_required_without_fuel_for_fuel(module_masses.clone())
-    );
-    println!(
-        "{}",
-        total_fuel_required_with_fuel_for_fuel(module_masses.clone())
-    );
 }
 
 #[cfg(test)]
