@@ -8,6 +8,7 @@ mod day01;
 mod day02;
 mod day03;
 mod day04;
+mod day05;
 
 use solution::Solution;
 
@@ -17,6 +18,7 @@ fn load_solution(day: i32) -> Box<dyn Solution> {
         2 => Box::new(day02::create_solution()),
         3 => Box::new(day03::create_solution()),
         4 => Box::new(day04::create_solution()),
+        5 => Box::new(day05::create_solution()),
         _ => panic!("Unknown day"),
     }
 }
@@ -35,6 +37,14 @@ fn run_solution(day: i32, problem: i32) -> String {
 
 fn main() {
     let matches = App::new("adventofcode")
+        .arg(
+            Arg::with_name("logging-level")
+                .help("Logging level")
+                .short("l")
+                .long("log")
+                .possible_values(&["off", "error", "warn", "info", "debug", "trace"])
+                .takes_value(true),
+        )
         .subcommand(
             SubCommand::with_name("problem")
                 .arg(
@@ -52,6 +62,18 @@ fn main() {
                 ),
         )
         .get_matches();
+
+    env_logger::builder()
+        .filter_level(
+            matches
+                .value_of("logging-level")
+                .unwrap_or("warn")
+                .parse()
+                .unwrap(),
+        )
+        .format_module_path(false)
+        .format_timestamp(None)
+        .init();
 
     match matches.subcommand() {
         ("problem", Some(problem_matches)) => {
