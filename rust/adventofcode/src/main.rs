@@ -9,6 +9,7 @@ mod day02;
 mod day03;
 mod day04;
 mod day05;
+mod day06;
 
 use solution::Solution;
 
@@ -19,6 +20,7 @@ fn load_solution(day: i32) -> Box<dyn Solution> {
         3 => Box::new(day03::create_solution()),
         4 => Box::new(day04::create_solution()),
         5 => Box::new(day05::create_solution()),
+        6 => Box::new(day06::create_solution()),
         _ => panic!("Unknown day"),
     }
 }
