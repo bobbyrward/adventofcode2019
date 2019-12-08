@@ -3,7 +3,7 @@ pub mod io;
 mod opcode;
 mod parameters;
 
-use log::debug;
+use log::{debug, info};
 
 use instruction::Instruction;
 use io::ProgramIO;
@@ -11,12 +11,14 @@ use opcode::ExecutionState;
 
 #[derive(Debug, Clone)]
 pub struct Program {
+    name: String,
     memory: Vec<i32>,
 }
 
 impl Program {
-    pub fn new(memory: &[i32]) -> Program {
+    pub fn new(name: &str, memory: &[i32]) -> Program {
         Program {
+            name: name.to_string(),
             memory: memory.iter().copied().collect(),
         }
     }
@@ -27,9 +29,10 @@ impl Program {
         loop {
             let (instruction, size) = Instruction::new(address, &self.memory);
 
-            debug!("Instruction(#{}): {}", address, instruction);
+            info!("{}: Instruction(#{}): {}", self.name, address, instruction);
             debug!(
-                "pre-execute: target={}, parameters={:?}",
+                "{}: pre-execute: target={}, parameters={:?}",
+                self.name,
                 instruction.target_value(&self.memory),
                 instruction.parameter_values(&self.memory),
             );
@@ -37,10 +40,11 @@ impl Program {
             let state = instruction.execute(&mut self.memory, io);
 
             debug!(
-                "post-execute: target={}",
+                "{}: post-execute: target={}",
+                self.name,
                 instruction.target_value(&self.memory),
             );
-            debug!("Memory: {:?}", self.memory);
+            // debug!("Memory: {:?}", self.memory);
 
             match state {
                 ExecutionState::Halt => break,
@@ -62,7 +66,10 @@ impl Program {
 
 impl Default for Program {
     fn default() -> Self {
-        Self { memory: Vec::new() }
+        Self {
+            name: "".to_string(),
+            memory: Vec::new(),
+        }
     }
 }
 
@@ -77,7 +84,7 @@ mod test {
 
     fn run_program(name: &str, code: &[i32], inputs: &[i32], expected_output: &[i32]) {
         let mut io = BasicProgramIO::new(inputs);
-        let mut program = Program::new(code);
+        let mut program = Program::new("", code);
         program.run(&mut io);
         assert_eq!(io.outputs(), expected_output, "{}", name);
     }
@@ -86,7 +93,7 @@ mod test {
     fn test_basic_intcode() {
         let test_fn = |actual: &mut [i32], expected: &[i32]| {
             let mut io = BasicProgramIO::new(&[]);
-            let mut program = Program::new(actual);
+            let mut program = Program::new("", actual);
             program.run(&mut io);
             assert_eq!(program.memory(), expected);
         };
@@ -103,7 +110,7 @@ mod test {
     #[test]
     fn test_intcode_io() {
         let mut io = BasicProgramIO::new(&[14]);
-        let mut program = Program::new(&vec![3, 0, 4, 0, 99]);
+        let mut program = Program::new("", &vec![3, 0, 4, 0, 99]);
         program.run(&mut io);
 
         assert_eq!(program.memory(), &[14, 0, 4, 0, 99]);

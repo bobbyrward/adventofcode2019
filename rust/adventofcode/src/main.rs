@@ -2,6 +2,7 @@ use clap::{App, Arg, SubCommand};
 use std::time::Instant;
 
 mod inputs;
+mod intcode;
 mod solution;
 
 mod day01;
@@ -10,6 +11,7 @@ mod day03;
 mod day04;
 mod day05;
 mod day06;
+mod day07;
 
 use solution::Solution;
 
@@ -21,6 +23,7 @@ fn load_solution(day: i32) -> Box<dyn Solution> {
         4 => Box::new(day04::create_solution()),
         5 => Box::new(day05::create_solution()),
         6 => Box::new(day06::create_solution()),
+        7 => Box::new(day07::create_solution()),
         _ => panic!("Unknown day"),
     }
 }

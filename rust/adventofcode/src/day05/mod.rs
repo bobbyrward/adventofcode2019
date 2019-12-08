@@ -1,8 +1,6 @@
-mod intcode;
-
+use crate::intcode::io::BasicProgramIO;
+use crate::intcode::Program;
 use crate::solution::Solution;
-use intcode::io::BasicProgramIO;
-use intcode::Program;
 
 #[derive(Debug, Clone)]
 pub struct Day05 {}
@@ -21,7 +19,7 @@ fn load_program(input: &str) -> Vec<i32> {
 impl Solution for Day05 {
     fn problem1(&self, input: &str) -> String {
         let mut io = BasicProgramIO::new(&[1]);
-        let mut program = Program::new(&load_program(input));
+        let mut program = Program::new("Day5 - Problem 1", &load_program(input));
 
         program.run(&mut io);
 
@@ -30,7 +28,7 @@ impl Solution for Day05 {
 
     fn problem2(&self, input: &str) -> String {
         let mut io = BasicProgramIO::new(&[5]);
-        let mut program = Program::new(&load_program(input));
+        let mut program = Program::new("Day5 - Problem 2", &load_program(input));
 
         program.run(&mut io);
 
