@@ -9,10 +9,10 @@ pub fn create_solution() -> Day05 {
     Day05 {}
 }
 
-fn load_program(input: &str) -> Vec<i32> {
+fn load_program(input: &str) -> Vec<i64> {
     input
         .split(',')
-        .map(|s| s.trim().parse::<i32>().unwrap())
+        .map(|s| s.trim().parse::<i64>().unwrap())
         .collect()
 }
 

@@ -4,19 +4,21 @@ use std::fmt;
 pub enum ParameterMode {
     Immediate,
     Address,
+    Relative,
 }
 
 impl ParameterMode {
-    pub fn from_opcode(opcode: i32, index: i32) -> ParameterMode {
-        (opcode / 10i32.pow((2 + index) as u32) % 10).into()
+    pub fn from_opcode(opcode: i64, index: i64) -> ParameterMode {
+        (opcode / 10i64.pow((2 + index) as u32) % 10).into()
     }
 }
 
-impl From<i32> for ParameterMode {
-    fn from(x: i32) -> ParameterMode {
+impl From<i64> for ParameterMode {
+    fn from(x: i64) -> ParameterMode {
         match x {
             0 => ParameterMode::Address,
             1 => ParameterMode::Immediate,
+            2 => ParameterMode::Relative,
             _ => panic!("Unknown parameter mode"),
         }
     }
@@ -25,11 +27,11 @@ impl From<i32> for ParameterMode {
 #[derive(Debug, Clone, Copy)]
 pub struct Parameter {
     mode: ParameterMode,
-    value: i32,
+    value: i64,
 }
 
 impl Parameter {
-    pub fn new(mode: ParameterMode, value: i32) -> Parameter {
+    pub fn new(mode: ParameterMode, value: i64) -> Parameter {
         match mode {
             ParameterMode::Immediate => Parameter { mode, value },
             ParameterMode::Address => {
@@ -38,22 +40,16 @@ impl Parameter {
                 }
                 Parameter { mode, value }
             }
+            ParameterMode::Relative => Parameter { mode, value },
         }
     }
 
-    pub fn value(self, memory: &[i32]) -> i32 {
-        match self.mode {
-            ParameterMode::Immediate => self.value,
-            ParameterMode::Address => memory[self.value as usize],
-        }
+    pub fn mode(&self) -> ParameterMode {
+        self.mode
     }
 
-    pub fn address<'a>(&self, memory: &'a [i32]) -> &'a i32 {
-        &memory[self.value as usize]
-    }
-
-    pub fn address_mut<'a>(&self, memory: &'a mut [i32]) -> &'a mut i32 {
-        &mut memory[self.value as usize]
+    pub fn value(&self) -> i64 {
+        self.value
     }
 }
 
@@ -71,6 +67,7 @@ impl fmt::Display for Parameter {
         match self.mode {
             ParameterMode::Immediate => write!(f, "\"{}\"", self.value),
             ParameterMode::Address => write!(f, "#{}", self.value),
+            ParameterMode::Relative => write!(f, "=>{}", self.value),
         }
     }
 }

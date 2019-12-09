@@ -1,66 +1,64 @@
 mod instruction;
 pub mod io;
+mod memory;
 mod opcode;
 mod parameters;
 
-use log::{debug, info};
+use log::info;
 
 use instruction::Instruction;
 use io::ProgramIO;
+use memory::ProgramMemory;
 use opcode::ExecutionState;
 
 #[derive(Debug, Clone)]
 pub struct Program {
     name: String,
-    memory: Vec<i32>,
+    memory: ProgramMemory,
 }
 
 impl Program {
-    pub fn new(name: &str, memory: &[i32]) -> Program {
+    pub fn new(name: &str, memory: &[i64]) -> Program {
         Program {
             name: name.to_string(),
-            memory: memory.iter().copied().collect(),
+            memory: ProgramMemory::from_buffer(memory),
+        }
+    }
+
+    pub fn with_capacity(name: &str, memory: &[i64], capacity: i64) -> Program {
+        let mut memory = ProgramMemory::from_buffer(memory);
+        memory.expand(capacity);
+        Program {
+            name: name.to_string(),
+            memory,
         }
     }
 
     pub fn run(&mut self, io: &mut impl ProgramIO) {
-        let mut address = 0;
-
         loop {
-            let (instruction, size) = Instruction::new(address, &self.memory);
+            let (instruction, size) = Instruction::new(self.memory.current_address(), &self.memory);
 
-            info!("{}: Instruction(#{}): {}", self.name, address, instruction);
-            debug!(
-                "{}: pre-execute: target={}, parameters={:?}",
+            info!(
+                "{}: Instruction(#{}): {}",
                 self.name,
-                instruction.target_value(&self.memory),
-                instruction.parameter_values(&self.memory),
+                self.memory.current_address(),
+                instruction
             );
 
-            let state = instruction.execute(&mut self.memory, io);
-
-            debug!(
-                "{}: post-execute: target={}",
-                self.name,
-                instruction.target_value(&self.memory),
-            );
-            // debug!("Memory: {:?}", self.memory);
-
-            match state {
+            match instruction.execute(&mut self.memory, io) {
                 ExecutionState::Halt => break,
                 ExecutionState::Continue => {
-                    address += size;
+                    self.memory.advance(size);
                 }
                 ExecutionState::Jump(n) => {
-                    address = n;
+                    self.memory.jump(n);
+                }
+                ExecutionState::AdjustRelative(n) => {
+                    self.memory.adjust_relative(n);
+                    self.memory.advance(size);
                 }
             };
         }
-    }
-
-    #[cfg(test)]
-    pub fn memory(&self) -> &[i32] {
-        &self.memory
     }
 }
 
@@ -68,7 +66,7 @@ impl Default for Program {
     fn default() -> Self {
         Self {
             name: "".to_string(),
-            memory: Vec::new(),
+            memory: ProgramMemory::new(),
         }
     }
 }
@@ -82,7 +80,7 @@ mod test {
         let _ = env_logger::builder().is_test(true).try_init();
     }
 
-    fn run_program(name: &str, code: &[i32], inputs: &[i32], expected_output: &[i32]) {
+    fn run_program(name: &str, code: &[i64], inputs: &[i64], expected_output: &[i64]) {
         let mut io = BasicProgramIO::new(inputs);
         let mut program = Program::new("", code);
         program.run(&mut io);
@@ -91,11 +89,11 @@ mod test {
 
     #[test]
     fn test_basic_intcode() {
-        let test_fn = |actual: &mut [i32], expected: &[i32]| {
+        let test_fn = |actual: &mut [i64], expected: &[i64]| {
             let mut io = BasicProgramIO::new(&[]);
             let mut program = Program::new("", actual);
             program.run(&mut io);
-            assert_eq!(program.memory(), expected);
+            assert_eq!(program.memory.dump(), expected);
         };
 
         test_fn(&mut [1, 0, 0, 0, 99], &[2, 0, 0, 0, 99]);
@@ -113,7 +111,7 @@ mod test {
         let mut program = Program::new("", &vec![3, 0, 4, 0, 99]);
         program.run(&mut io);
 
-        assert_eq!(program.memory(), &[14, 0, 4, 0, 99]);
+        assert_eq!(program.memory.dump(), &[14, 0, 4, 0, 99]);
         assert_eq!(io.outputs(), &[14]);
     }
 
