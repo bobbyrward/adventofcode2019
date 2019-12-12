@@ -6,6 +6,7 @@ use super::opcode::{ExecutionState, OpCode};
 use super::parameters::{Parameter, ParameterMode};
 
 #[derive(Debug, Clone)]
+/// An intcode instruction
 pub struct Instruction {
     operation: OpCode,
     param1: Option<Parameter>,

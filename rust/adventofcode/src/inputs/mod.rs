@@ -8,6 +8,7 @@ pub fn load_input(day: i32) -> String {
         6 => include_str!("day06.txt").into(),
         7 => include_str!("day07.txt").into(),
         9 => include_str!("day09.txt").into(),
+        11 => include_str!("day11.txt").into(),
         _ => panic!("Unknown day for input"),
     }
 }

@@ -12,10 +12,13 @@ use memory::ProgramMemory;
 use opcode::ExecutionState;
 
 #[derive(Debug, Clone)]
+/// An intcode program
 pub struct Program {
     name: String,
     memory: ProgramMemory,
 }
+
+const PROGRAM_SIZE: i64 = 1024 * 1024 * 4;
 
 impl Program {
     pub fn new(name: &str, memory: &[i64]) -> Program {
@@ -25,13 +28,18 @@ impl Program {
         }
     }
 
-    pub fn with_capacity(name: &str, memory: &[i64], capacity: i64) -> Program {
-        let mut memory = ProgramMemory::from_buffer(memory);
-        memory.expand(capacity);
-        Program {
-            name: name.to_string(),
-            memory,
-        }
+    pub fn expand(&mut self) {
+        self.memory.expand(PROGRAM_SIZE);
+    }
+
+    pub fn from_str(name: &str, code: &str) -> Program {
+        Self::new(
+            name,
+            &code
+                .split(',')
+                .map(|s| s.trim().parse::<i64>().unwrap())
+                .collect::<Vec<_>>(),
+        )
     }
 
     pub fn run(&mut self, io: &mut impl ProgramIO) {

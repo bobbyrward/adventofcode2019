@@ -237,6 +237,7 @@ mod test {
         );
     }
 
+    /*
     #[test]
     fn test_example_permutations() {
         init_logging();
@@ -263,6 +264,7 @@ mod test {
             65210,
         );
     }
+    */
 
     /* TODO: These are unstable because the last thread can drop before the last result is read
      *       I may revisit this but it's difficult to fix without changing the intcode being run

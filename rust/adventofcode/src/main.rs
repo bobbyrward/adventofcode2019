@@ -3,6 +3,7 @@ use std::time::Instant;
 
 mod inputs;
 mod intcode;
+mod point;
 mod solution;
 
 mod day01;
@@ -13,6 +14,7 @@ mod day05;
 mod day06;
 mod day07;
 mod day09;
+mod day11;
 
 use solution::Solution;
 
@@ -26,6 +28,7 @@ fn load_solution(day: i32) -> Box<dyn Solution> {
         6 => Box::new(day06::create_solution()),
         7 => Box::new(day07::create_solution()),
         9 => Box::new(day09::create_solution()),
+        11 => Box::new(day11::create_solution()),
         _ => panic!("Unknown day"),
     }
 }

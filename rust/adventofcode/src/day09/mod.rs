@@ -9,18 +9,11 @@ pub fn create_solution() -> Day09 {
     Day09 {}
 }
 
-fn load_program(input: &str) -> Vec<i64> {
-    input
-        .split(',')
-        .map(|s| s.trim().parse::<i64>().unwrap())
-        .collect()
-}
-
 impl Solution for Day09 {
     fn problem1(&self, input: &str) -> String {
         let mut io = BasicProgramIO::new(&[1]);
-        let mut program =
-            Program::with_capacity("Test Mode", &load_program(input), 1024 * 1024 * 4);
+        let mut program = Program::from_str("Test Mode", input);
+        program.expand();
 
         program.run(&mut io);
 
@@ -29,8 +22,8 @@ impl Solution for Day09 {
 
     fn problem2(&self, input: &str) -> String {
         let mut io = BasicProgramIO::new(&[2]);
-        let mut program =
-            Program::with_capacity("Boost Mode", &load_program(input), 1024 * 1024 * 4);
+        let mut program = Program::from_str("Boost Mode", input);
+        program.expand();
 
         program.run(&mut io);
 
@@ -50,7 +43,8 @@ mod test {
         let code = [1102, 34915192, 34915192, 7, 4, 7, 99, 0];
 
         let mut io = BasicProgramIO::new(&[]);
-        let mut program = Program::with_capacity("Test 16 Digits", &code, 1024 * 1024 * 4);
+        let mut program = Program::new("Test 16 Digits", &code);
+        program.expand();
 
         program.run(&mut io);
 
@@ -61,7 +55,8 @@ mod test {
     fn test_64bit_output() {
         let code = [104, 1125899906842624, 99];
         let mut io = BasicProgramIO::new(&[]);
-        let mut program = Program::with_capacity("Test 64 bit output", &code, 1024 * 1024 * 4);
+        let mut program = Program::new("Test 64 bit output", &code);
+        program.expand();
 
         program.run(&mut io);
 
@@ -75,7 +70,8 @@ mod test {
         ];
 
         let mut io = BasicProgramIO::new(&[]);
-        let mut program = Program::with_capacity("Test Quine", &code, 1024 * 1024 * 4);
+        let mut program = Program::new("Test Quine", &code);
+        program.expand();
 
         program.run(&mut io);
 
@@ -84,9 +80,9 @@ mod test {
 
     #[test]
     fn test_diagnostic() {
-        let code = load_program(&crate::inputs::load_input(9));
         let mut io = BasicProgramIO::new(&[1]);
-        let mut program = Program::with_capacity("Test Run Diagnostic", &code, 1024 * 1024 * 4);
+        let mut program = Program::from_str("Test Run Diagnostic", &crate::inputs::load_input(9));
+        program.expand();
 
         program.run(&mut io);
 
